@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>qdzx map</title>
+  <link rel="stylesheet" href="/leaflet/leaflet.css" />
+  <link rel="stylesheet" href="/leaflet/leaflet.magnifyingglass.css" />
+  <script src="/leaflet/leaflet.js"></script>
+  <script src="/leaflet/leaflet-bing-layer.min.js"></script>
+  <script src="/leaflet/leaflet-ant-path.min.js"></script>
+  <script src="/leaflet/leaflet.rotatedMarker.js"></script>
+  <script src="/leaflet/leaflet.magnifyingglass.js"></script>
+  <style>
+    .origin-icon {
+      background-color: gold;
+      border-radius: 100%;
+      width: 34px;
+      height: 34px;
+    }
+
+    .leaflet-popup-content {
+      text-align: center;
+    }
+
+    body,
+    html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      /* 禁用滚动 */
+    }
+
+    #map {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="map"></div>
+  <script>
+    function getAngleBetweenPoints(p1x, p1y, p2x, p2y) {
+      var deltaX = p2x - p1x;
+      var deltaY = p2y - p1y;
+      // 点积公式
+      var angle = Math.atan2(deltaY, deltaX);
+      // 转换为角度制
+      angle = angle * (180 / Math.PI);
+      return angle;
+    }
+
+    var data = [
+      { 'name': '刘子诚', 'pic': '/pic/thumbnail/thumbnail_liuzicheng.jpg', 'pos': [40.1019523, -88.2271615], 'isusa': 1 },
+      { 'name': '房天慈', 'pic': '/pic/thumbnail/thumbnail_fangtianci.jpg', 'pos': [51.5113662, -0.115997], 'isusa': 0 },
+      { 'name': '刘青山', 'pic': '/pic/thumbnail/thumbnail_liuqingshan.jpg', 'pos': [51.52399, -0.134091], 'isusa': 0 },
+      { 'name': '吴怡可', 'pic': '/pic/thumbnail/thumbnail_wuyike.jpg', 'pos': [51.52399, -0.134092], 'isusa': 0 },
+      { 'name': '吴晓语', 'pic': '/pic/thumbnail/thumbnail_wuxiaoyu.jpg', 'pos': [51.52399, -0.134093], 'isusa': 0 },
+      { 'name': '姚博宏', 'pic': '/pic/thumbnail/thumbnail_yaobohong.jpg', 'pos': [51.52399, -0.134094], 'isusa': 0 },
+      { 'name': '张宁', 'pic': '/pic/thumbnail/thumbnail_zhangning.jpg', 'pos': [51.52399, -0.134095], 'isusa': 0 },
+      { 'name': '张夏溪', 'pic': '/pic/thumbnail/thumbnail_zhangxiaxi.jpg', 'pos': [51.52399, -0.134096], 'isusa': 0 },
+      { 'name': '郑傲丹', 'pic': '/pic/thumbnail/thumbnail_zhengaodan.jpg', 'pos': [51.52399, -0.134097], 'isusa': 0 },
+      { 'name': '王舜生', 'pic': '/pic/thumbnail/thumbnail_wangshunsheng.jpg', 'pos': [51.52399, -0.134098], 'isusa': 0 },
+      { 'name': '纪义佳', 'pic': '/pic/thumbnail/thumbnail_jiyijia.jpg', 'pos': [51.51417, -0.116439], 'isusa': 0 },
+      { 'name': '董源', 'pic': '/pic/thumbnail/thumbnail_dongyuan.jpg', 'pos': [42.7297313, -73.6789876], 'isusa': 1 },
+      { 'name': '衡妍', 'pic': '/pic/thumbnail/thumbnail_hengyan.jpg', 'pos': [33.9566656, -83.375192], 'isusa': 1 },
+      { 'name': '李林清', 'pic': '/pic/thumbnail/thumbnail_lilinqing.jpg', 'pos': [29.6490947, -82.3390299], 'isusa': 1 },
+      { 'name': '崔佳豪', 'pic': '/pic/thumbnail/thumbnail_cuijiahao.jpg', 'pos': [40.0060889, -83.0282624], 'isusa': 1 },
+      { 'name': '宛卓远', 'pic': '/pic/thumbnail/thumbnail_wanzhuoyuan.jpg', 'pos': [40.0060889, -83.0282625], 'isusa': 1 },
+      { 'name': '赵超越', 'pic': '/pic/thumbnail/thumbnail_zhaochaoyue.jpg', 'pos': [40.0060889, -83.0282626], 'isusa': 1 },
+      { 'name': '刘宗瑜', 'pic': '/pic/thumbnail/thumbnail_liuzongyu.jpg', 'pos': [40.376152, -82.3957933], 'isusa': 1 },
+      { 'name': '李中元', 'pic': '/pic/thumbnail/thumbnail_lizhongyuan.jpg', 'pos': [52.203596, 0.115171], 'isusa': 0 },
+      { 'name': '黄冠翔', 'pic': '/pic/thumbnail/thumbnail_huangguanxiang.jpg', 'pos': [52.203596, 0.115172], 'isusa': 0 },
+      { 'name': '邢文', 'pic': '/pic/thumbnail/thumbnail_xingwen.jpg', 'pos': [52.203596, 0.115173], 'isusa': 0 },
+      { 'name': '许珺', 'pic': '/pic/thumbnail/thumbnail_xujun.jpg', 'pos': [37.870151, -122.2594606], 'isusa': 1 },
+      { 'name': '杨若菲', 'pic': '/pic/thumbnail/thumbnail_yangruofei.jpg', 'pos': [32.881168, -117.234360], 'isusa': 1 },
+      { 'name': '于子衍', 'pic': '/pic/thumbnail/thumbnail_yuziyan.jpg', 'pos': [44.2611716, -88.3989041], 'isusa': 1 },
+      { 'name': '刘鹏宇', 'pic': '/pic/thumbnail/thumbnail_liupengyu.jpg', 'pos': [47.6550, -122.4601833], 'isusa': 1 },
+      { 'name': '石雅文', 'pic': '/pic/thumbnail/thumbnail_shiyawen.jpg', 'pos': [47.6550, -122.4601834], 'isusa': 1 },
+      { 'name': '侯懿家', 'pic': '/pic/thumbnail/thumbnail_houyijia.jpg', 'pos': [50.9373322, -1.3976549], 'isusa': 0 },
+      { 'name': '李佳晨', 'pic': '/pic/thumbnail/thumbnail_lijiachen.jpg', 'pos': [33.7971368, -84.32224], 'isusa': 1 },
+      { 'name': '宋沅芮', 'pic': '/pic/thumbnail/thumbnail_songyuanrui.jpg', 'pos': [33.7971368, -84.32225], 'isusa': 1 },
+      { 'name': '李中豪', 'pic': '/pic/thumbnail/thumbnail_lizhonghao.jpg', 'pos': [-37.7983459, 144.960974], 'isusa': 0 },
+      { 'name': '高传奕', 'pic': '/pic/thumbnail/thumbnail_gaochuanyi.jpg', 'pos': [51.4585376, -2.6021758], 'isusa': 0 },
+      { 'name': '高子淇', 'pic': '/pic/thumbnail/thumbnail_gaoziqi.jpg', 'pos': [51.4585376, -2.6021758], 'isusa': 0 },
+      { 'name': '苏彻', 'pic': '/pic/thumbnail/thumbnail_suche.jpg', 'pos': [51.4998023, -0.1761157], 'isusa': 0 },
+      { 'name': '于佳宁', 'pic': '/pic/thumbnail/thumbnail_yujianing.jpg', 'pos': [51.4998023, -0.1761158], 'isusa': 0 },
+      { 'name': '周润禾', 'pic': '/pic/thumbnail/thumbnail_zhourunhe.jpg', 'pos': [1.2966426, 103.7763939], 'isusa': 0 },
+      // {'name':'马千惠','pic':'/pic/thumbnail/thumbnail_maqianhui.jpg','pos':[180,90],'isusa':0},
+      { 'name': '张程凯', 'pic': '/pic/thumbnail/thumbnail_zhangchengkai.jpg', 'pos': [40.6913844, -73.9629858], 'isusa': 1 },
+      // {'name':'雒嘉瑶','pic':'/pic/thumbnail/thumbnail_luojiayao.jpg','pos':[180,90],'isusa':0},
+      // {'name':'邓思齐','pic':'/pic/thumbnail/thumbnail_dengsiqi.jpg','pos':[180,90],'isusa':0},
+      // {'name':'廉博凯','pic':'/pic/thumbnail/thumbnail_lianbokai.jpg','pos':[180,90],'isusa':0},
+      // {'name':'韩雨泽','pic':'/pic/thumbnail/thumbnail_hanyuze.jpg','pos':[180,90],'isusa':0},
+      // {'name':'万昊源','pic':'/pic/thumbnail/thumbnail_wanhaoyuan.jpg','pos':[180,90],'isusa':0},
+      { 'name': '孙佳欣', 'pic': '/pic/thumbnail/thumbnail_sunjiaxin.jpg', 'pos': [42.3355488, -71.1684945], 'isusa': 1 },
+      { 'name': '曲浩洋', 'pic': '/pic/thumbnail/thumbnail_quhaoyang.jpg', 'pos': [43.47722854, -80.5448576], 'isusa': 1 },
+      { 'name': '岳金凝', 'pic': '/pic/thumbnail/thumbnail_yuejinning.jpg', 'pos': [40.7234033, -73.9990862], 'isusa': 1 },
+      { 'name': '范莉圆', 'pic': '/pic/thumbnail/thumbnail_fanliyuan.jpg', 'pos': [43.1305531, -77.6260033], 'isusa': 1 },
+      { 'name': '董倩如', 'pic': '/pic/thumbnail/thumbnail_dongqianru.jpg', 'pos': [-37.9142416, 145.1346592], 'isusa': 0 },
+      { 'name': '贾俊融', 'pic': '/pic/thumbnail/thumbnail_jiajunrong.jpg', 'pos': [22.3370342, 114.17272], 'isusa': 0 },
+      { 'name': 'Yoo Heechan', 'pic': '/pic/thumbnail/thumbnail_yooheechan.jpg', 'pos': [22.2830891, 114.1365621], 'isusa': 0 }
+      // {'name':'Lee Yeonjun','pic':'/pic/thumbnail/thumbnail_leeyeonjun.jpg','pos':[180,90],'isusa':0}
+    ];
+  </script>
+  <script>
+    var map = L.map('map').setView([0, 140], 2);
+
+    // bing map 备份方案
+    L.tileLayer.bing({
+      bingMapsKey: 'AsgWdLdkufRXoNRj7nZkO76ea-vt_h-e0TqO_DIbhihJhL_lLk7emWpm9etUblGs',
+      imagerySet: 'CanvasLight'
+    })//.addTo(map);
+
+    // 本地地图服务
+    L.tileLayer('/global_tiles/{z}_{x}_{y}.png', {
+      minZoom: 2,
+      maxZoom: 16,
+      attribution: ""
+    })//.addTo(map);
+
+    L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZGFtb25jaGVubG0iLCJhIjoiY2txYTlkb2N0MDZjcTJ1azF2cWwzY2NzdiJ9.AlODK2ThtyQjKfMRc6XwBA', {
+      minZoom: 2,
+      maxZoom: 16,
+      attribution: ""
+    }).addTo(map);
+
+    var magnifyingGlass = L.magnifyingGlass({
+      zoomOffset: 3,
+      layers: [L.tileLayer('/global_tiles/{z}_{x}_{y}.png')],
+      radius: 180,
+      fixedPosition: true,
+      latLng: [54.302399, -4.517714]
+    })//.addTo(map);
+
+    // 放置中心点
+    L.marker([36.255834, 120.292524], {
+      icon: L.divIcon({
+        className: 'origin-icon',
+        iconSize: [12, 12]
+      })
+    }).addTo(map);
+
+    // 学校位置
+    var centerLatLng = [36.255834, 120.292524];
+
+    // 生成结束点数组
+    var endPoints = [];
+    for (var i = 0; i < data.length; i++) {
+      if (data[i]["isusa"]) {
+        data[i]["pos"][1] += 360;
+      }
+      endPoints.push(data[i]["pos"]);
+    }
+
+    var airplaneIcon = L.icon({
+      iconUrl: '/airplane.png',
+      iconSize: [30, 30],
+      iconAnchor: [16, 15],
+      shadowAnchor: [0, 0],
+      popupAnchor: [0, 0]
+    });
+
+    // 初始化线条数组和目标点数组
+    var polylines = [];
+    var airplanes = [];
+    var targetPoints = [];
+
+    // 创建初始线条
+    function createInitialPolylines(center, points) {
+      points.forEach(function (point) {
+        var polyline = L.polyline([center, center], {
+          // "delay": 800,
+          // "dashArray": [10, 20],
+          // "weight": 5,
+          // "color": "#00ff0F",
+          // "pulseColor": "#FFFFFF",
+          // "paused": false,
+          // "reverse": false,
+          // "hardwareAccelerated": true
+        }).addTo(map);
+        polylines.push(polyline);
+        airplanes.push(L.marker(
+          centerLatLng,
+          {
+            icon: airplaneIcon,
+            rotationAngle: getAngleBetweenPoints(centerLatLng[0], centerLatLng[1], point[0], point[1]),
+            draggable: true
+          }).addTo(map));
+      });
+    }
+
+    // 更新线条位置（动画效果）
+    function updatePolylinePositions(center, points, duration) {
+      var start = null;
+      function animate(time) {
+        if (!start) start = time;
+        var progress = time - start;
+        var t = Math.min(progress / duration, 1);
+
+        for (var i = 0; i < polylines.length; i++) {
+          var lat = center[0] + t * (points[i][0] - center[0]);
+          var lng = center[1] + t * (points[i][1] - center[1]);
+          var latlngs = [center, [lat, lng]];
+          polylines[i].setLatLngs(latlngs);
+          airplanes[i].setLatLng([lat, lng]);
+        }
+
+        if (t < 1) {
+          requestAnimationFrame(animate);
+        }
+      }
+      requestAnimationFrame(animate);
+    }
+
+    // 设置扩散参数并生成目标点
+    var distance = 0.01; // 扩散距离（经纬度差异）
+    var duration = 3000; // 动画持续时间（毫秒）
+
+    createInitialPolylines(centerLatLng, endPoints);
+
+    // 延迟一段时间后开始动画
+    setTimeout(function () {
+      updatePolylinePositions(centerLatLng, endPoints, duration);
+    }, 500);
+
+    setTimeout(function () {
+      // 放点和弹窗
+      var markers = [];
+      for (var i = 0; i < data.length; i++) {
+        markers.push(
+          L.marker(data[i]["pos"]).addTo(map)
+            .bindPopup("<img style=\"width: 100%;\" src=\"" + data[i]["pic"] + "\"/>"+data[i]["name"], { closeOnClick: false, autoClose: false }).openPopup()
+        );
+      }
+      airplanes.forEach(function (airplane) {
+        map.removeLayer(airplane);
+      });
+
+      // 移除弹窗右上角的叉
+      var ddl = document.getElementsByClassName("leaflet-popup-close-button");
+      for (var i = 0; i < ddl.length; i++) {
+        ddl[i].innerHTML = "";
+      }
+    }, duration + 550);
+
+    map.setView([0, 140], 2);
+
+  </script>
+</body>
+
+</html>
